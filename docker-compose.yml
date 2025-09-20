@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: perfume-db
+    environment:
+      POSTGRES_DB: perfume
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d perfume"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: perfume-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Override JDBC to use the dockerized Postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/perfume
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      # IMPORTANT: Backend CORS config reads a 'hostname' property and allows "http://{hostname}"
+      # We want the frontend to be served on http://localhost:3000 (nginx on port 80 mapped to 3000)
+      SPRING_APPLICATION_JSON: '{"hostname":"localhost:3000"}'
+      # Optional: tweak JVM (adjust as you like)
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: perfume-frontend
+    depends_on:
+      - backend
+    ports:
+      # Expose the SPA on http://localhost:3000
+      - "3000:80"
+
+volumes:
+  db_data:
+
+# Use Compose v3+
+name: perfume-ecommerce

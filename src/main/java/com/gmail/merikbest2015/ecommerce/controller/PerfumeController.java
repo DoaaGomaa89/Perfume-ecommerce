@@ -21,6 +21,7 @@ import static com.gmail.merikbest2015.ecommerce.constants.PathConstants.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(API_V1_PERFUMES)
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class PerfumeController {
 
     private final PerfumeMapper perfumeMapper;

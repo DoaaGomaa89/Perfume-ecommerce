@@ -93,7 +93,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return "User successfully registered.";
     }
 
-    @Override
+
     @Transactional
     public User registerOauth2User(String provider, OAuth2UserInfo oAuth2UserInfo) {
         User user = new User();
@@ -105,8 +105,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
         return userRepository.save(user);
     }
-
-    @Override
+    
     @Transactional
     public User updateOauth2User(User user, String provider, OAuth2UserInfo oAuth2UserInfo) {
         user.setFirstName(oAuth2UserInfo.getFirstName());

@@ -18,6 +18,7 @@ import static com.gmail.merikbest2015.ecommerce.constants.PathConstants.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(API_V1_AUTH)
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AuthenticationController {
 
     private final AuthenticationMapper authenticationMapper;

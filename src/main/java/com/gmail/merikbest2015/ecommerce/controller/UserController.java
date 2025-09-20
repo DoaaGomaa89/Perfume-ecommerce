@@ -22,6 +22,7 @@ import static com.gmail.merikbest2015.ecommerce.constants.PathConstants.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(API_V1_USERS)
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class UserController {
 
     private final UserMapper userMapper;

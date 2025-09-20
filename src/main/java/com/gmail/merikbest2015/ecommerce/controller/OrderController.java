@@ -25,6 +25,7 @@ import static com.gmail.merikbest2015.ecommerce.constants.PathConstants.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(API_V1_ORDER)
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class OrderController {
 
     private final OrderMapper orderMapper;

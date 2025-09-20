@@ -31,6 +31,7 @@ import static com.gmail.merikbest2015.ecommerce.constants.PathConstants.*;
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('ADMIN')")
 @RequestMapping(API_V1_ADMIN)
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AdminController {
 
     private final UserMapper userMapper;

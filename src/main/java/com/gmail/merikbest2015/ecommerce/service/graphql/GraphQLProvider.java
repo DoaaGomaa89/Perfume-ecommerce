@@ -1,57 +1,49 @@
 package com.gmail.merikbest2015.ecommerce.service.graphql;
 
-import com.gmail.merikbest2015.ecommerce.service.OrderService;
-import com.gmail.merikbest2015.ecommerce.service.PerfumeService;
-import com.gmail.merikbest2015.ecommerce.service.UserService;
+import com.coxautodev.graphql.tools.SchemaParser;
+import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class GraphQLProvider {
 
-    private final PerfumeService perfumeService;
-    private final OrderService orderService;
-    private final UserService userService;
-
-    @Value("classpath:graphql/schemas.graphql")
-    private Resource resource;
-
-    @Getter
     private GraphQL graphQL;
 
-    @PostConstruct
-    public void loadSchema() throws IOException {
-        File fileSchema = resource.getFile();
-        TypeDefinitionRegistry typeRegistry = new SchemaParser().parse(fileSchema);
-        RuntimeWiring wiring = buildRuntimeWiring();
-        GraphQLSchema schema = new SchemaGenerator().makeExecutableSchema(typeRegistry, wiring);
-        graphQL = GraphQL.newGraphQL(schema).build();
+    public GraphQL getGraphQL() {
+        return graphQL;
     }
 
-    private RuntimeWiring buildRuntimeWiring() {
-        return RuntimeWiring.newRuntimeWiring()
-                .type("Query", typeWiring -> typeWiring
-                        .dataFetcher("perfumes", perfumeService.getAllPerfumesByQuery())
-                        .dataFetcher("perfumesIds", perfumeService.getAllPerfumesByIdsQuery())
-                        .dataFetcher("perfume", perfumeService.getPerfumeByQuery())
-                        .dataFetcher("orders", orderService.getAllOrdersByQuery())
-                        .dataFetcher("ordersByEmail", orderService.getUserOrdersByEmailQuery())
-                        .dataFetcher("users", userService.getAllUsersByQuery())
-                        .dataFetcher("user", userService.getUserByQuery()))
-                .build();
+    @PostConstruct
+    public void init() throws Exception {
+        // Load schema from classpath inside the jar
+        String sdl = loadResourceAsString("/graphql/schemas.graphql");
+
+        GraphQLSchema schema = SchemaParser.newParser()
+                .schemaString(sdl)
+                .build()
+                .makeExecutableSchema();
+
+        this.graphQL = GraphQL.newGraphQL(schema).build();
+    }
+
+    private String loadResourceAsString(String path) throws Exception {
+        try (InputStream is = getClass().getResourceAsStream(path)) {
+            if (is == null) {
+                throw new IllegalStateException("Schema not found on classpath: " + path);
+            }
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                return br.lines().collect(Collectors.joining("\n"));
+            }
+        }
     }
 }

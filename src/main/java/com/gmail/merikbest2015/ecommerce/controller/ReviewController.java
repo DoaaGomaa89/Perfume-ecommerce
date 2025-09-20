@@ -18,6 +18,7 @@ import static com.gmail.merikbest2015.ecommerce.constants.PathConstants.PERFUME_
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(API_V1_REVIEW)
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class ReviewController {
 
     private final ReviewMapper reviewMapper;
